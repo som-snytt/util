@@ -16,7 +16,7 @@
 
 package com.twitter.util
 
-import java.lang.reflect.{InvocationHandler, Method, Proxy}
+import java.lang.reflect.{InvocationHandler, InvocationTargetException, Method, Proxy}
 import scala.collection.{Map, Set}
 import scala.collection.mutable
 
@@ -49,6 +49,15 @@ class SunSignalHandler extends SignalHandler {
   private val nameMethod = signalClass.getMethod("getName")
 
   def handle(signal: String, handlers: Map[String, Set[String => Unit]]) {
+    try {
+      handleRaw(signal, handlers)
+    } catch {
+      case e: InvocationTargetException => throw e.getCause
+      case other => throw other
+    }
+  }
+
+  private def handleRaw(signal: String, handlers: Map[String, Set[String => Unit]]) {
     val sunSignal = signalClass.getConstructor(classOf[String]).newInstance(signal).asInstanceOf[Object]
     val proxy = Proxy.newProxyInstance(signalHandlerClass.getClassLoader, Array[Class[_]](signalHandlerClass),
       new InvocationHandler {

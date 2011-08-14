@@ -102,7 +102,12 @@ class FileHandlerSpec extends Specification with TempFolder {
           newReader.readLine mustEqual "second post"
         }
       } catch {
-        case ex: ClassNotFoundException =>
+        case e: ClassNotFoundException => skip("No sun signal support on this platform")
+        case e: java.lang.reflect.InvocationTargetException =>
+          if (e.getCause.getMessage.contains("HUP"))
+            skip("No such signal on this platform")
+          else
+            throw e
       }
     }
 

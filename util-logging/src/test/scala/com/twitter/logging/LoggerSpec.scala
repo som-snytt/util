@@ -203,7 +203,7 @@ class LoggerSpec extends Specification with TempFolder with TestLogging {
               maxToDisplay = 10
               handler = new FileHandlerConfig {
                 filename = folderName + "/production.log"
-                roll = Policy.SigHup
+                roll = Policy.Hourly // pick a platform-agnostic setting
                 formatter = new FormatterConfig {
                   truncateStackTracesAt = 100
                 }
